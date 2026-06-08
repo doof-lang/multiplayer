@@ -1,0 +1,40 @@
+{
+  "name": "std/multiplayer",
+  "version": "0.1.0",
+  "license": "ISC",
+  "build": {
+    "native": {
+      "extraCopyPaths": [
+        "native_multiplayer.hpp"
+      ],
+      "macos": {
+        "sourceFiles": [
+          "native_multiplayer.mm"
+        ],
+        "frameworks": [
+          "Foundation",
+          "MultipeerConnectivity"
+        ]
+      },
+      "iosSimulator": {
+        "sourceFiles": [
+          "native_multiplayer.mm"
+        ],
+        "frameworks": [
+          "Foundation",
+          "MultipeerConnectivity"
+        ]
+      },
+      "iosDevice": {
+        "sourceFiles": [
+          "native_multiplayer.mm"
+        ],
+        "frameworks": [
+          "Foundation",
+          "MultipeerConnectivity"
+        ]
+      }
+    }
+  },
+  "dependencies": {}
+}
