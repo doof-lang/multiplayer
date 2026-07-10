@@ -213,15 +213,15 @@ doof::Result<void, std::string> NativeMultiplayerSession::Impl::initialize() {
             browser_.delegate = delegate_;
         }
     } @catch (NSException* exception) {
-        return doof::Result<void, std::string>::failure(cppString(exception.reason));
+        return doof::Failure<std::string>{cppString(exception.reason)};
     }
 
-    return doof::Result<void, std::string>::success();
+    return doof::Success<void>{};
 }
 
 doof::Result<void, std::string> NativeMultiplayerSession::Impl::start() {
     if (started_) {
-        return doof::Result<void, std::string>::success();
+        return doof::Success<void>{};
     }
     started_ = true;
     if (advertiser_ != nil) {
@@ -231,7 +231,7 @@ doof::Result<void, std::string> NativeMultiplayerSession::Impl::start() {
         [browser_ startBrowsingForPeers];
     }
     emit(kEventStarted, nil, nil, nil, nil);
-    return doof::Result<void, std::string>::success();
+    return doof::Success<void>{};
 }
 
 void NativeMultiplayerSession::Impl::stop() {
@@ -255,19 +255,19 @@ void NativeMultiplayerSession::Impl::stop() {
 
 doof::Result<void, std::string> NativeMultiplayerSession::Impl::invite(const std::string& peerId) {
     if (browser_ == nil) {
-        return doof::Result<void, std::string>::failure("Only browsing clients can invite peers");
+        return doof::Failure<std::string>{"Only browsing clients can invite peers"};
     }
     auto it = foundPeers_.find(peerId);
     if (it == foundPeers_.end()) {
-        return doof::Result<void, std::string>::failure("Peer is not currently discoverable: " + peerId);
+        return doof::Failure<std::string>{"Peer is not currently discoverable: " + peerId};
     }
     [browser_ invitePeer:it->second toSession:session_ withContext:nil timeout:30.0];
-    return doof::Result<void, std::string>::success();
+    return doof::Success<void>{};
 }
 
 doof::Result<void, std::string> NativeMultiplayerSession::Impl::sendText(const std::string& peerId, const std::string& text) {
     if (session_ == nil) {
-        return doof::Result<void, std::string>::failure("Session is closed");
+        return doof::Failure<std::string>{"Session is closed"};
     }
 
     NSMutableArray<MCPeerID*>* targets = [NSMutableArray array];
@@ -278,17 +278,17 @@ doof::Result<void, std::string> NativeMultiplayerSession::Impl::sendText(const s
     }
 
     if (targets.count == 0) {
-        return doof::Result<void, std::string>::failure("Peer is not connected: " + peerId);
+        return doof::Failure<std::string>{"Peer is not connected: " + peerId};
     }
 
     NSData* data = [nsString(text) dataUsingEncoding:NSUTF8StringEncoding];
     NSError* error = nil;
     BOOL ok = [session_ sendData:data toPeers:targets withMode:MCSessionSendDataReliable error:&error];
     if (!ok) {
-        return doof::Result<void, std::string>::failure(nsError(error, "Failed to send message"));
+        return doof::Failure<std::string>{nsError(error, "Failed to send message")};
     }
 
-    return doof::Result<void, std::string>::success();
+    return doof::Success<void>{};
 }
 
 void NativeMultiplayerSession::Impl::emit(int32_t kind, MCPeerID* peer, NSDictionary<NSString*, NSString*>* discoveryInfo, NSString* message, NSString* error) {
@@ -340,21 +340,19 @@ doof::Result<std::shared_ptr<NativeMultiplayerSession>, std::string> NativeMulti
     NativeMultiplayerSession::EventCallback callback
 ) {
     if (displayName.empty()) {
-        return doof::Result<std::shared_ptr<NativeMultiplayerSession>, std::string>::failure("Display name must not be empty");
+        return doof::Failure<std::string>{"Display name must not be empty"};
     }
     if (roleCode != 0 && roleCode != 1) {
-        return doof::Result<std::shared_ptr<NativeMultiplayerSession>, std::string>::failure("Unknown multiplayer role");
+        return doof::Failure<std::string>{"Unknown multiplayer role"};
     }
 
     auto impl = std::make_unique<Impl>(serviceType, displayName, discoveryInfoText, roleCode, std::move(callback));
     auto initialized = impl->initialize();
-    if (initialized.isFailure()) {
-        return doof::Result<std::shared_ptr<NativeMultiplayerSession>, std::string>::failure(initialized.error());
+    if (doof::is_failure(initialized)) {
+        return doof::Failure<std::string>{doof::failure_error(initialized)};
     }
 
-    return doof::Result<std::shared_ptr<NativeMultiplayerSession>, std::string>::success(
-        std::shared_ptr<NativeMultiplayerSession>(new NativeMultiplayerSession(std::move(impl)))
-    );
+    return doof::Success<std::shared_ptr<NativeMultiplayerSession>>{std::shared_ptr<NativeMultiplayerSession>(new NativeMultiplayerSession(std::move(impl)))};
 }
 
 NativeMultiplayerSession::NativeMultiplayerSession(std::unique_ptr<Impl> impl)
