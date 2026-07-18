@@ -1,10 +1,10 @@
 export import class NativeMultiplayerEvent from "./native_multiplayer.hpp" as doof_multiplayer::NativeMultiplayerEvent {
-  kind(): int
-  peerId(): string
-  displayName(): string
-  discoveryInfoText(): string
-  messageText(): string
-  error(): string
+  isolated kind(): int
+  isolated peerId(): string
+  isolated displayName(): string
+  isolated discoveryInfoText(): string
+  isolated messageText(): string
+  isolated error(): string
 }
 
 export import class NativeMultiplayerSession from "./native_multiplayer.hpp" as doof_multiplayer::NativeMultiplayerSession {
