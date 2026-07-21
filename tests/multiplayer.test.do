@@ -10,7 +10,7 @@ import {
   validateProtocolHello,
 } from "../index"
 
-function assertValidServiceType(serviceType: string): void {
+function assertValidServiceType(serviceType: string): none {
   result := validateAppleServiceType(serviceType)
   case result {
     _: Success -> {}
@@ -18,7 +18,7 @@ function assertValidServiceType(serviceType: string): void {
   }
 }
 
-function assertInvalidServiceType(serviceType: string): void {
+function assertInvalidServiceType(serviceType: string): none {
   result := validateAppleServiceType(serviceType)
   case result {
     _: Success -> Assert.fail("Expected invalid service type: ${serviceType}")
@@ -36,13 +36,13 @@ function testConfig(): MultiplayerConfig {
   }
 }
 
-export function testValidateAppleServiceTypeAcceptsBonjourStyleName(): void {
+export function testValidateAppleServiceTypeAcceptsBonjourStyleName(): none {
   assertValidServiceType("doof-jigsaw")
   assertValidServiceType("a1")
   assertValidServiceType("abc-123")
 }
 
-export function testValidateAppleServiceTypeRejectsInvalidNames(): void {
+export function testValidateAppleServiceTypeRejectsInvalidNames(): none {
   assertInvalidServiceType("")
   assertInvalidServiceType("doof-jigsaw-peer")
   assertInvalidServiceType("Doof")
@@ -53,7 +53,7 @@ export function testValidateAppleServiceTypeRejectsInvalidNames(): void {
   assertInvalidServiceType("doof_jigsaw")
 }
 
-export function testProtocolHelloRoundTripsThroughJson(): void {
+export function testProtocolHelloRoundTripsThroughJson(): none {
   hello := ProtocolHello {
     protocolId: "dev.doof.jigsaw",
     protocolVersion: 1,
@@ -68,7 +68,7 @@ export function testProtocolHelloRoundTripsThroughJson(): void {
   Assert.equal(decoded.role, hello.role)
 }
 
-export function testValidateProtocolHelloAcceptsMatchingProtocol(): void {
+export function testValidateProtocolHelloAcceptsMatchingProtocol(): none {
   config := testConfig()
   hello := ProtocolHello {
     protocolId: config.protocolId,
@@ -84,7 +84,7 @@ export function testValidateProtocolHelloAcceptsMatchingProtocol(): void {
   }
 }
 
-export function testValidateProtocolHelloRejectsMismatches(): void {
+export function testValidateProtocolHelloRejectsMismatches(): none {
   config := testConfig()
   wrongId := ProtocolHello {
     protocolId: "other",

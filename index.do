@@ -44,9 +44,9 @@ export class ProtocolHello {
 
 export class MultiplayerEvent {
   readonly kind: MultiplayerEventKind
-  readonly peer: PeerInfo | null = null
+  readonly peer: PeerInfo | none = none
   readonly messageText: string = ""
-  readonly hello: ProtocolHello | null = null
+  readonly hello: ProtocolHello | none = none
   readonly error: string = ""
 }
 
@@ -56,25 +56,25 @@ export class MultiplayerSession {
   private readonly eventSender: ChannelSender<MultiplayerEvent>
   private readonly native: NativeMultiplayerSession
 
-  onEvent(handler: (event: MultiplayerEvent): void): MultiplayerSession {
+  onEvent(handler: (event: MultiplayerEvent): none): MultiplayerSession {
     this.events.onMessage(handler)
     return this
   }
 
-  start(): Result<void, string> {
+  start(): Result<none, string> {
     return this.native.start()
   }
 
-  stop(): void {
+  stop(): none {
     this.native.stop()
     this.events.close()
   }
 
-  invite(peerId: string): Result<void, string> {
+  invite(peerId: string): Result<none, string> {
     return this.native.invite(peerId)
   }
 
-  send(peerId: string, text: string): Result<void, string> {
+  send(peerId: string, text: string): Result<none, string> {
     return this.native.sendText(peerId, text)
   }
 }
@@ -90,7 +90,7 @@ export function createMultiplayerSession(config: MultiplayerConfig): Result<Mult
     keepsAlive: true,
   }
 
-  let session: MultiplayerSession | null = null
+  let session: MultiplayerSession | none = none
   let pendingEvents: NativeMultiplayerEvent[] = []
   nativeResult := NativeMultiplayerSession.create(
     config.serviceType,
@@ -100,7 +100,7 @@ export function createMultiplayerSession(config: MultiplayerConfig): Result<Mult
     (event: NativeMultiplayerEvent): int => emitNativeEventWhenReady(session, pendingEvents, event),
   )
 
-  let native: NativeMultiplayerSession | null = null
+  let native: NativeMultiplayerSession | none = none
   case nativeResult {
     s: Success -> {
       native = s.value
@@ -123,11 +123,11 @@ export function createMultiplayerSession(config: MultiplayerConfig): Result<Mult
     ignored := emitNativeEvent(actualSession, event)
   }
 
-  eventSender.onClosed((): void => actualSession.native.stop())
+  eventSender.onClosed((): none => actualSession.native.stop())
   return Success { value: actualSession }
 }
 
-export function validateAppleServiceType(serviceType: string): Result<void, string> {
+export function validateAppleServiceType(serviceType: string): Result<none, string> {
   if serviceType.length < 1 || serviceType.length > 15 {
     return Failure("Apple service type must be 1-15 characters")
   }
@@ -167,7 +167,7 @@ export function decodeProtocolHello(text: string): Result<ProtocolHello, string>
   return ProtocolHello.fromJsonValue(json)
 }
 
-export function validateProtocolHello(config: MultiplayerConfig, hello: ProtocolHello): Result<void, string> {
+export function validateProtocolHello(config: MultiplayerConfig, hello: ProtocolHello): Result<none, string> {
   if hello.protocolId != config.protocolId {
     return Failure("Peer protocol id '${hello.protocolId}' does not match '${config.protocolId}'")
   }
@@ -206,7 +206,7 @@ function peerFromNative(event: NativeMultiplayerEvent): PeerInfo {
 }
 
 function emitNativeEventWhenReady(
-  session: MultiplayerSession | null,
+  session: MultiplayerSession | none,
   pendingEvents: NativeMultiplayerEvent[],
   event: NativeMultiplayerEvent,
 ): int {
@@ -226,14 +226,14 @@ function emitNativeEvent(
   return channelSendResultToNativeCode(sent)
 }
 
-function eventKey(event: MultiplayerEvent): string | null {
-  if event.peer == null {
-    return null
+function eventKey(event: MultiplayerEvent): string | none {
+  if event.peer == none {
+    return none
   }
   return case event.kind {
     MultiplayerEventKind.PeerFound -> "found:${event.peer!.id}",
     MultiplayerEventKind.PeerLost -> "lost:${event.peer!.id}",
-    _ -> null,
+    _ -> none,
   }
 }
 
@@ -326,7 +326,7 @@ function publicMessageEvent(
   }
 }
 
-function emitLocalError(session: MultiplayerSession, error: string): void {
+function emitLocalError(session: MultiplayerSession, error: string): none {
   ignored := session.eventSender.send(MultiplayerEvent {
     kind: MultiplayerEventKind.Error,
     error,

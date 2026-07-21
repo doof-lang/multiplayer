@@ -16,8 +16,8 @@ export import class NativeMultiplayerSession from "./native_multiplayer.hpp" as 
     callback: (event: NativeMultiplayerEvent): int,
   ): Result<NativeMultiplayerSession, string>
 
-  start(): Result<void, string>
-  stop(): void
-  invite(peerId: string): Result<void, string>
-  sendText(peerId: string, text: string): Result<void, string>
+  start(): Result<none, string>
+  stop(): none
+  invite(peerId: string): Result<none, string>
+  sendText(peerId: string, text: string): Result<none, string>
 }
