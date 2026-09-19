@@ -159,12 +159,12 @@ export function validateAppleServiceType(serviceType: string): Result<none, stri
 }
 
 export function encodeProtocolHello(hello: ProtocolHello): string {
-  return formatJsonValue(hello.toJsonObject())
+  return formatJsonValue(hello.toSerialObject())
 }
 
 export function decodeProtocolHello(text: string): Result<ProtocolHello, string> {
   try json := parseJsonValue(text)
-  return ProtocolHello.fromJsonValue(json)
+  return ProtocolHello.fromSerialValue(json)
 }
 
 export function validateProtocolHello(config: MultiplayerConfig, hello: ProtocolHello): Result<none, string> {
