@@ -61,7 +61,7 @@ export function testProtocolHelloRoundTripsThroughJson(): none {
     role: MultiplayerRole.Client,
   }
 
-  decoded := try! decodeProtocolHello(encodeProtocolHello(hello))
+  decoded := decodeProtocolHello(encodeProtocolHello(hello))!
   Assert.equal(decoded.protocolId, hello.protocolId)
   Assert.equal(decoded.protocolVersion, hello.protocolVersion)
   Assert.equal(decoded.displayName, hello.displayName)
